@@ -57,7 +57,7 @@
 
 <p>So first we'll modify the category argument from "cat" to "cat' OR 1=1;--" to attempt to disable the category filtering. Did it work?</p>
 
-<p style='text-align: center;'><a href='images/overview.png'><img src='images/filter-disabled.png' width='300' alt='Image showing all animals, not just cats.' /></a></p>
+<p style='text-align: center;'><a href='images/filter-disabled.png'><img src='images/filter-disabled.png' width='300' alt='Image showing all animals, not just cats.' /></a></p>
 
 <p>Now that we're sure we've got control, let's clear our pallete with the url <code>/pets.php?category=cat' AND 0=1;--</code>. This clears out all results. The results seem to have three pieces of data: a title, an image, and an id for a url. Let's test this now with the following URL: <code>/pets.php?category=cat' AND 0=1 UNION SELECT 'first', 'second', 'third';--</code></p>
 
