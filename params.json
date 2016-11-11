@@ -1,0 +1,6 @@
+{
+  "name": "Webuyyourpets",
+  "tagline": "An SQL Injection training site.",
+  "body": "# We Buy Your Pets - SQL Injection Training Site\r\n\r\nThis project was set up as a training site against sql injection. The code here was written with no knowledge of standard sql injection mitigation techniques. It is intended as an educational resource only.\r\n\r\n## Guide\r\n\r\nIn progress\r\n\r\n## Credits\r\n\r\nPage layout modified from [W3Layouts](http://w3layouts.com/)\r\n\r\nImages courtesy of [Pexels](https://www.pexels.com/)\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
