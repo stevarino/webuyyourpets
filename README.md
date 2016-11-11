@@ -4,6 +4,6 @@ This project was set up as a training site against sql injection. The code here 
 
 ## Credits
 
-Page layout modified from (W3Layouts)[http://w3layouts.com/]
+Page layout modified from [W3Layouts](http://w3layouts.com/)
 
-Images courtesy of (Pexels)[https://www.pexels.com/]
+Images courtesy of [Pexels](https://www.pexels.com/)
