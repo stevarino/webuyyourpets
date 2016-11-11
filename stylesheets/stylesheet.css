@@ -163,6 +163,10 @@ pre {
   overflow-y: hidden;
 }
 
+p code {
+  color: #b5e853;
+}
+
 table {
   width: 100%;
   margin: 0 0 20px 0;
